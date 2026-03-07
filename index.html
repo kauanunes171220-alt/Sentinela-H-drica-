@@ -69,7 +69,8 @@
             font-weight: bold;
             font-size: 1.2rem;
             margin-top: 10px;
-            background-color: var(--warning); /* Muda via JavaScript */
+            background-color: var(--safe); /* Cor padrão, o JS vai alterar */
+            text-transform: capitalize;
         }
 
         .grid-cards {
@@ -121,8 +122,8 @@
 
     <div class="container">
         <section class="status-geral">
-            <h2>Status Atual da Região</h2>
-            <div id="badge-status" class="alerta-badge">Atenção: Chuvas Moderadas</div>
+            <h2>Clima Atual na Região</h2>
+            <div id="badge-status" class="alerta-badge">Carregando dados...</div>
             <p class="descricao" style="margin-top: 10px;">Última atualização: <span id="hora-atual"></span></p>
         </section>
 
@@ -131,25 +132,25 @@
             <div class="card" style="border-top-color: #0077b6;">
                 <h3>Nível do Arroio Feijó</h3>
                 <div class="dado-destaque">2.8m</div>
-                <p class="descricao">Nível de alerta: 3.5m</p>
+                <p class="descricao">Nível de alerta: 3.5m (Atualização manual)</p>
             </div>
 
             <div class="card" style="border-top-color: #023e8a;">
-                <h3>Precipitação (24h)</h3>
-                <div class="dado-destaque">45 mm</div>
-                <p class="descricao">Volume acumulado nas últimas 24 horas.</p>
+                <h3>Precipitação (Última hora)</h3>
+                <div id="precipitacao-valor" class="dado-destaque">-- mm</div>
+                <p class="descricao">Volume de chuva recente e temp: <span id="temperatura-valor">--</span>°C.</p>
             </div>
 
             <div class="card" style="border-top-color: #e63946;">
                 <h3>Risco de Enchente</h3>
-                <div class="dado-destaque" style="color: #e63946;">Médio</div>
-                <p class="descricao">Áreas baixas de Alvorada devem ficar em alerta.</p>
+                <div id="risco-enchente-valor" class="dado-destaque">Analisando...</div>
+                <p id="risco-enchente-desc" class="descricao">Avaliando condições atuais da chuva.</p>
             </div>
 
             <div class="card" style="border-top-color: #f4a261;">
-                <h3>Risco de Seca</h3>
-                <div class="dado-destaque" style="color: #2a9d8f;">Baixo</div>
-                <p class="descricao">Abastecimento de água operando normalmente.</p>
+                <h3>Umidade do Ar</h3>
+                <div id="umidade-valor" class="dado-destaque" style="color: #2a9d8f;">--%</div>
+                <p class="descricao">Indicador importante para períodos de seca.</p>
             </div>
 
         </section>
@@ -160,7 +161,7 @@
     </footer>
 
     <script>
-        // Função simples para mostrar a hora atual
+        // Função para mostrar a hora atual
         function atualizarHora() {
             const agora = new Date();
             const horas = agora.getHours().toString().padStart(2, '0');
@@ -168,8 +169,74 @@
             document.getElementById('hora-atual').innerText = `${horas}:${minutos}`;
         }
         
+        // Função principal que busca os dados da API
+        async function buscarDadosClima() {
+            const apiKey = '7d71224ebe47a8040ebf46f844424f79';
+            const cidade = 'Alvorada,BR';
+            const url = `https://api.openweathermap.org/data/2.5/weather?q=${cidade}&appid=${apiKey}&units=metric&lang=pt_br`;
+
+            try {
+                const resposta = await fetch(url);
+                const dados = await resposta.json();
+
+                // 1. Atualizar Status e Temperatura
+                const descricaoClima = dados.weather[0].description;
+                const temperatura = Math.round(dados.main.temp);
+                document.getElementById('badge-status').innerText = descricaoClima;
+                document.getElementById('temperatura-valor').innerText = temperatura;
+
+                // 2. Atualizar Umidade
+                document.getElementById('umidade-valor').innerText = dados.main.humidity + '%';
+
+                // 3. Verificar Precipitação (Chuva)
+                let volumeChuva = 0;
+                // A API só manda a propriedade "rain" se estiver chovendo
+                if (dados.rain && dados.rain['1h']) {
+                    volumeChuva = dados.rain['1h'];
+                }
+                document.getElementById('precipitacao-valor').innerText = volumeChuva + ' mm';
+
+                // 4. Lógica Visual de Riscos e Cores
+                const badge = document.getElementById('badge-status');
+                const riscoEnchente = document.getElementById('risco-enchente-valor');
+                const riscoDesc = document.getElementById('risco-enchente-desc');
+
+                // Se estiver chovendo forte (> 10mm na hora)
+                if (volumeChuva > 10) {
+                    badge.style.backgroundColor = 'var(--danger)'; // Vermelho
+                    riscoEnchente.innerText = 'Alto';
+                    riscoEnchente.style.color = 'var(--danger)';
+                    riscoDesc.innerText = 'Chuva intensa! Áreas baixas em alerta.';
+                } 
+                // Se estiver chovendo fraco/moderado
+                else if (volumeChuva > 0) {
+                    badge.style.backgroundColor = 'var(--warning)'; // Laranja
+                    riscoEnchente.innerText = 'Médio';
+                    riscoEnchente.style.color = 'var(--warning)';
+                    riscoDesc.innerText = 'Chuva na região. Atenção ao nível dos arroios.';
+                } 
+                // Se não estiver chovendo
+                else {
+                    badge.style.backgroundColor = 'var(--safe)'; // Verde
+                    riscoEnchente.innerText = 'Baixo';
+                    riscoEnchente.style.color = 'var(--safe)';
+                    riscoDesc.innerText = 'Sem chuvas no momento. Situação controlada.';
+                }
+
+            } catch (erro) {
+                console.error("Erro ao buscar dados da API:", erro);
+                document.getElementById('badge-status').innerText = "Erro ao carregar clima";
+                document.getElementById('badge-status').style.backgroundColor = 'var(--warning)';
+            }
+        }
+
+        // Inicia as funções assim que o site abre
         atualizarHora();
-        setInterval(atualizarHora, 60000); // Atualiza a cada minuto
+        buscarDadosClima();
+        
+        // Atualiza a hora a cada 1 minuto e o clima a cada 10 minutos
+        setInterval(atualizarHora, 60000);
+        setInterval(buscarDadosClima, 600000); // 600.000 milissegundos = 10 min
     </script>
 
 </body>
