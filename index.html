@@ -276,7 +276,6 @@
         buscarDadosClima();
         setInterval(atualizarHora, 60000); // Relógio atualiza a cada minuto
         setInterval(buscarDadosClima, 300000); // Clima atualiza a cada 5 minutos
-<script>
   if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('./sw.js')
       .then(() => console.log("Sentinela Hídrica: Modo Offline Ativo"))
