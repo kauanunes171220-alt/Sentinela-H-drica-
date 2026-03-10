@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#3498db">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sentinela Hídrica - RS</title>
+    <style>
+        :root {
+            --primary: #023e8a;
+            --secondary: #0077b6;
+            --bg-color: #e9ecef;
+            --card-bg: #ffffff;
+            --text-main: #2b2d42;
+            --safe: #2a9d8f;
+            --warning: #f4a261;
+            --danger: #d90429;
+            --water: #00b4d8;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', system-ui, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            padding-bottom: 40px;
+        }
+
+        header {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            padding: 2rem 1rem;
+            text-align: center;
+            border-bottom-left-radius: 20px;
+            border-bottom-right-radius: 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        header h1 {
+            font-size: 2rem;
+            margin-bottom: 5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: -20px auto 20px;
+            padding: 0 15px;
+        }
+
+        .section-title {
+            margin: 30px 0 15px;
+            font-size: 1.3rem;
+            color: var(--primary);
+            border-bottom: 2px solid #ccc;
+            padding-bottom: 5px;
+        }
+
+        /* Card de Status Principal */
+        .status-geral {
+            background-color: var(--card-bg);
+            border-radius: 15px;
+            padding: 25px;
+            text-align: center;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+        }
+
+        .alerta-badge {
+            display: inline-block;
+            padding: 12px 25px;
+            border-radius: 30px;
+            color: white;
+            font-weight: bold;
+            font-size: 1.2rem;
+            margin: 15px 0;
+            text-transform: capitalize;
+            transition: background-color 0.3s ease;
+        }
+
+        /* Grids */
+        .grid-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+
+        .card {
+            background-color: var(--card-bg);
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+            border-left: 5px solid var(--secondary);
+            transition: transform 0.2s;
+        }
+
+        .card:hover {
+            transform: translateY(-3px);
+        }
+
+        .card h3 {
+            font-size: 1rem;
+            color: #6c757d;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .dado-destaque {
+            font-size: 2.2rem;
+            font-weight: 800;
+            color: var(--text-main);
+        }
+
+        .dado-destaque span {
+            font-size: 1rem;
+            font-weight: normal;
+            color: #6c757d;
+        }
+
+        .descricao {
+            font-size: 0.85rem;
+            color: #8d99ae;
+            margin-top: 8px;
+            line-height: 1.4;
+        }
+
+        /* Cores Específicas para os Níveis de Água */
+        .card-agua { border-left-color: var(--water); }
+        .card-chuva { border-left-color: var(--primary); }
+        .card-vento { border-left-color: #adb5bd; }
+
+        footer {
+            text-align: center;
+            margin-top: 40px;
+            font-size: 0.85rem;
+            color: #6c757d;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>🌊 Sentinela Hídrica</h1>
+        <p>Monitoramento Integrado: Alvorada e Região Metropolitana - RS</p>
+    </header>
+
+    <div class="container">
+        <section class="status-geral">
+            <h2 style="color: #6c757d; font-size: 1.1rem; text-transform: uppercase;">Tempo Agora em Alvorada</h2>
+            <div id="badge-status" class="alerta-badge" style="background-color: #ccc;">Carregando satélite...</div>
+            <p class="descricao">Atualizado hoje às <span id="hora-atual" style="font-weight: bold;">--:--</span></p>
+        </section>
+
+        <h2 class="section-title">☁️ Dados Meteorológicos (Ao Vivo)</h2>
+        <section class="grid-cards">
+            
+            <div class="card card-chuva">
+                <h3>Precipitação (1h)</h3>
+                <div id="precipitacao-valor" class="dado-destaque">-- <span>mm</span></div>
+                <p id="risco-enchente-desc" class="descricao">Analisando volume de chuva...</p>
+            </div>
+
+            <div class="card">
+                <h3>Temperatura</h3>
+                <div class="dado-destaque"><span id="temperatura-valor" style="font-size: 2.2rem; color: var(--text-main);">--</span><span>°C</span></div>
+                <p class="descricao">Sensação térmica de <span id="sensacao-valor" style="font-weight: bold;">--</span>°C.</p>
+            </div>
+
+            <div class="card card-vento">
+                <h3>Vento</h3>
+                <div class="dado-destaque"><span id="vento-valor" style="font-size: 2.2rem; color: var(--text-main);">--</span> <span>km/h</span></div>
+                <p class="descricao">Importante para o nível da Lagoa e Guaíba.</p>
+            </div>
+
+            <div class="card">
+                <h3>Umidade</h3>
+                <div class="dado-destaque"><span id="umidade-valor" style="font-size: 2.2rem; color: var(--text-main);">--</span><span>%</span></div>
+                <p class="descricao">Nível atual de umidade do ar.</p>
+            </div>
+
+        </section>
+
+        <h2 class="section-title">📏 Níveis Hidrológicos (Atualização Manual)</h2>
+        <section class="grid-cards">
+            
+            <div class="card card-agua">
+                <h3>Arroio Feijó (Alvorada)</h3>
+                <div class="dado-destaque">2.8 <span>m</span></div>
+                <p class="descricao">Cota de Inundação: 3.5m <br><strong style="color: var(--warning);">Status: Atenção</strong></p>
+            </div>
+
+            <div class="card card-agua">
+                <h3>Rio Guaíba (Cais Mauá)</h3>
+                <div class="dado-destaque">1.9 <span>m</span></div>
+                <p class="descricao">Cota de Inundação: 3.0m <br><strong style="color: var(--safe);">Status: Normal</strong></p>
+            </div>
+
+            <div class="card card-agua">
+                <h3>Lagoa dos Patos</h3>
+                <div class="dado-destaque">1.2 <span>m</span></div>
+                <p class="descricao">Nível médio atual influenciado pelos ventos.</p>
+            </div>
+
+        </section>
+    </div>
+
+    <footer>
+        <p>Desenvolvido para a proteção da comunidade. Dados climáticos via OpenWeatherMap.</p>
+    </footer>
+
+    <script>
+        function atualizarHora() {
+            const agora = new Date();
+            document.getElementById('hora-atual').innerText = agora.getHours().toString().padStart(2, '0') + ":" + agora.getMinutes().toString().padStart(2, '0');
+        }
+        
+        async function buscarDadosClima() {
+            const apiKey = '7d71224ebe47a8040ebf46f844424f79';
+            const cidade = 'Alvorada,BR';
+            // Adicionado parâmetro para pegar dados em português e em métricas (Celsius)
+            const url = `https://api.openweathermap.org/data/2.5/weather?q=${cidade}&appid=${apiKey}&units=metric&lang=pt_br`;
+
+            try {
+                const resposta = await fetch(url);
+                if (!resposta.ok) throw new Error('Falha na comunicação com o satélite');
+                const dados = await resposta.json();
+
+                // 1. Clima Geral
+                const badge = document.getElementById('badge-status');
+                badge.innerText = dados.weather[0].description;
+                
+                // 2. Temperaturas
+                document.getElementById('temperatura-valor').innerText = Math.round(dados.main.temp);
+                document.getElementById('sensacao-valor').innerText = Math.round(dados.main.feels_like);
+                
+                // 3. Umidade e Vento (Convertendo m/s para km/h)
+                document.getElementById('umidade-valor').innerText = dados.main.humidity;
+                const ventoKmH = Math.round(dados.wind.speed * 3.6);
+                document.getElementById('vento-valor').innerText = ventoKmH;
+
+                // 4. Chuva e Alertas
+                const chuva = (dados.rain && dados.rain['1h']) ? dados.rain['1h'] : 0;
+                document.getElementById('precipitacao-valor').innerHTML = `${chuva} <span>mm</span>`;
+                
+                const riscoDesc = document.getElementById('risco-enchente-desc');
+                
+                if (chuva > 10) { 
+                    badge.style.backgroundColor = 'var(--danger)'; 
+                    riscoDesc.innerText = '⚠️ Chuva forte! Risco elevado para arroios e áreas baixas.';
+                    riscoDesc.style.color = 'var(--danger)';
+                    riscoDesc.style.fontWeight = 'bold';
+                } else if (chuva > 0) {
+                    badge.style.backgroundColor = 'var(--warning)'; 
+                    riscoDesc.innerText = 'Chovendo no momento. Fique atento aos níveis da água.';
+                } else { 
+                    badge.style.backgroundColor = 'var(--safe)'; 
+                    riscoDesc.innerText = 'Sem chuvas recentes. Condições favoráveis.';
+                }
+            } catch (erro) {
+                console.error(erro);
+                document.getElementById('badge-status').innerText = "Erro ao atualizar clima";
+                document.getElementById('badge-status').style.backgroundColor = 'var(--warning)';
+            }
+        }
+
+        atualizarHora();
+        buscarDadosClima();
+        setInterval(atualizarHora, 60000); // Relógio atualiza a cada minuto
+        setInterval(buscarDadosClima, 300000); // Clima atualiza a cada 5 minutos
+<script>
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('./sw.js')
+      .then(() => console.log("Sentinela Hídrica: Modo Offline Ativo"))
+      .catch(err => console.log("Erro no Service Worker:", err));
+  }
+    </script>
+</body>
+</html>
