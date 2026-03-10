@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-<link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#3498db">
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#3498db">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sentinela Hídrica - RS</title>
@@ -144,6 +144,24 @@
             font-size: 0.85rem;
             color: #6c757d;
         }
+        
+        /* Estilo do Botão de Instalação */
+        #btnInstalar {
+            background-color: var(--primary);
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 30px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            display: none; /* Fica escondido até o navegador permitir a instalação */
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+            transition: transform 0.2s;
+        }
+        #btnInstalar:hover {
+            transform: scale(1.05);
+        }
     </style>
 </head>
 <body>
@@ -154,6 +172,11 @@
     </header>
 
     <div class="container">
+        
+        <div style="text-align: center; margin-bottom: 25px; margin-top: 10px;">
+            <button id="btnInstalar">📲 Instalar o Sentinela</button>
+        </div>
+
         <section class="status-geral">
             <h2 style="color: #6c757d; font-size: 1.1rem; text-transform: uppercase;">Tempo Agora em Alvorada</h2>
             <div id="badge-status" class="alerta-badge" style="background-color: #ccc;">Carregando satélite...</div>
@@ -276,11 +299,46 @@
         buscarDadosClima();
         setInterval(atualizarHora, 60000); // Relógio atualiza a cada minuto
         setInterval(buscarDadosClima, 300000); // Clima atualiza a cada 5 minutos
-  if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('./sw.js')
-      .then(() => console.log("Sentinela Hídrica: Modo Offline Ativo"))
-      .catch(err => console.log("Erro no Service Worker:", err));
-  }
+
+        // ==========================================
+        // LÓGICA DO BOTÃO DE INSTALAÇÃO PWA
+        // ==========================================
+        let deferredPrompt;
+        const btnInstalar = document.getElementById('btnInstalar');
+
+        window.addEventListener('beforeinstallprompt', (e) => {
+            // Impede o Chrome de mostrar o prompt de instalação padrão automaticamente
+            e.preventDefault();
+            // Guarda o evento para poder dispará-lo depois
+            deferredPrompt = e;
+            // Atualiza a interface mostrando o botão de instalação
+            btnInstalar.style.display = 'inline-block';
+        });
+
+        btnInstalar.addEventListener('click', async () => {
+            if (deferredPrompt) {
+                // Mostra o prompt de instalação do sistema
+                deferredPrompt.prompt();
+                // Espera o usuário interagir com o prompt
+                const { outcome } = await deferredPrompt.userChoice;
+                if (outcome === 'accepted') {
+                    console.log('Usuário aceitou instalar o Sentinela Hídrica');
+                }
+                // Limpa o prompt guardado, pois só pode ser usado uma vez
+                deferredPrompt = null;
+                // Esconde o botão novamente
+                btnInstalar.style.display = 'none';
+            }
+        });
+
+        // ==========================================
+        // REGISTRO DO SERVICE WORKER (OFFLINE)
+        // ==========================================
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('./sw.js')
+            .then(() => console.log("Sentinela Hídrica: Modo Offline Ativo"))
+            .catch(err => console.log("Erro no Service Worker:", err));
+        }
     </script>
 </body>
 </html>
