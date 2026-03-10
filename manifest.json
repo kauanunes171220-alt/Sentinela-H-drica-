@@ -1,27 +1,21 @@
 {
   "name": "Sentinela Hídrica",
   "short_name": "Sentinela",
+  "description": "Monitoramento de níveis hídricos em Alvorada, RS",
   "start_url": "index.html",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#3498db",
   "icons": [
     {
-      "src": "https://raw.githubusercontent.com/kauanunes171220-alt/Sentinela-H-drica-/main/sentinela%20hidrica.png",
+      "src": "https://raw.githubusercontent.com/kauanunes171220-alt/Sentinela-H-drica-/main/sentinela%20h%C3%ADdrica%20icon.png",
       "sizes": "192x192",
       "type": "image/png"
     },
     {
-      "src": "https://raw.githubusercontent.com/kauanunes171220-alt/Sentinela-H-drica-/main/sentinela%20hidrica.png",
+      "src": "https://raw.githubusercontent.com/kauanunes171220-alt/Sentinela-H-drica-/main/sentinela%20h%C3%ADdrica%20icon.png",
       "sizes": "512x512",
       "type": "image/png"
     }
-    {
-  "name": "Sentinela Hídrica",
-  "scope": "./",
-  "start_url": "./index.html",
-  ...
-    }
   ]
 }
-
